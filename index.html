@@ -49,6 +49,7 @@ tr.sel td{background:rgba(39,168,255,.12)}
 <body>
 <div class="app">
 <h1>Preventiva</h1><p class="sb">Pontos de calibração · pressão, Trex e painel</p>
+<input type="text" data-k="tag" placeholder="TAG (ex.: FT-1234)" autocapitalize="characters" autocomplete="off" style="margin-bottom:4px">
 
 <section class="panel"><div class="ph">① Instrumento <span style="font-weight:400;color:#7e96a7">faixa de pressão</span></div><div class="pb">
   <div class="row">
@@ -90,6 +91,11 @@ tr.sel td{background:rgba(39,168,255,.12)}
   <div class="tw" id="tab"></div>
 </div></section>
 
+<div style="display:flex;gap:12px;align-items:center;margin-top:14px">
+  <button class="seg-b" id="bSave" style="background:#1f6fb2;border:1px solid #1f6fb2;color:#fff;font:inherit;font-weight:700;border-radius:9px;padding:13px 20px;cursor:pointer">💾 Salvar</button>
+  <span id="svOk" class="hint" style="margin:0"></span>
+</div>
+<section class="panel"><div class="ph">Salvos neste aparelho</div><div class="pb" id="saved"></div></section>
 <div class="foot">Conferência na tela; nada é configurado no instrumento. Dados ficam só neste aparelho.</div>
 </div>
 <script src="calc.js"></script>
@@ -125,13 +131,29 @@ function render(){
     h+='<tr'+(p===S.pct?' class="sel"':'')+'><td class="mono">'+p+'%</td><td class="mono">'+fmt(q.aplicar)+'</td><td class="mono">'+fmt(q.trex)+'</td><td class="mono">'+fmt(q.mA,2)+'</td><td class="mono">'+fmt(q.painel)+'</td></tr>';});
   tb.innerHTML=h+'</tbody></table>';
 }
+var SK='preventiva.saved.v1';
+function getSaved(){try{return JSON.parse(localStorage.getItem(SK))||[]}catch(e){return[]}}
+function setSaved(a){try{localStorage.setItem(SK,JSON.stringify(a));return true}catch(e){return false}}
+function p2(n){return(n<10?'0':'')+n}
+function fdt(t){var d=new Date(t);return p2(d.getDate())+'/'+p2(d.getMonth()+1)+'/'+d.getFullYear()+' '+p2(d.getHours())+':'+p2(d.getMinutes())}
+function resumo(){var m=model();
+  return 'Faixa '+fmt(m.lo)+'–'+fmt(m.hi)+' '+m.unit+' · gerador em '+m.gen+' · saída '+(m.saida==='dp'?'linear em ΔP':'proporcional à vazão')+' · painel '+fmt(m.pLo)+'–'+fmt(m.pHi)+' '+(S.pUn||'')+' em '+(m.trat==='raiz'?'raiz quadrada':'linear');}
+function renderSaved(){var a=getSaved(),h='';
+  if(!a.length)h='<p class="hint" style="margin:0">Nada salvo ainda. Digite a TAG e toque em Salvar.</p>';
+  a.slice().reverse().forEach(function(it,j){var i=a.length-1-j;
+    h+='<div style="display:flex;gap:10px;justify-content:space-between;align-items:center;padding:10px 0;border-top:1px solid var(--line)"><div><div style="font-weight:700">'+esc(it.tag||'(sem TAG)')+'</div><div class="hint" style="margin:2px 0 0">'+fdt(it.t)+'</div><div style="font-size:12px;color:#9fb5c4">'+esc(it.res)+'</div></div><div style="display:flex;gap:6px;flex-shrink:0"><button class="seg-b" data-open="'+i+'" style="background:#081521;border:1px solid var(--line);color:#b8cad6;border-radius:9px;padding:10px 12px;font:inherit;font-size:13px">Abrir</button><button data-del="'+i+'" style="background:#081521;border:1px solid var(--line);color:#b8cad6;border-radius:9px;padding:10px 12px;font:inherit;font-size:13px">Excluir</button></div></div>';});
+  $('#saved').innerHTML=h;}
 function upd(){try{localStorage.setItem(KEY,JSON.stringify(S))}catch(e){}render()}
 document.addEventListener('input',function(e){var k=e.target.getAttribute&&e.target.getAttribute('data-k');if(!k)return;S[k]=e.target.value;upd()});
 document.addEventListener('click',function(e){
+  if(e.target.id==='bSave'){var a=getSaved();a.push({t:Date.now(),tag:S.tag||'',res:resumo(),S:JSON.parse(JSON.stringify(S))});
+    $('#svOk').textContent=setSaved(a)?'Salvo em '+fdt(Date.now())+'.':'Não foi possível salvar.';renderSaved();return}
+  var bo=e.target.closest&&e.target.closest('[data-open]');if(bo){var it=getSaved()[+bo.getAttribute('data-open')];if(it){S=Object.assign({tag:''},it.S);upd();window.scrollTo({top:0,behavior:'smooth'})}return}
+  var bd=e.target.closest&&e.target.closest('[data-del]');if(bd){if(confirm('Excluir este item salvo?')){var b2=getSaved();b2.splice(+bd.getAttribute('data-del'),1);setSaved(b2);renderSaved()}return}
   var b=e.target.closest&&e.target.closest('button[data-k]');if(b){S[b.getAttribute('data-k')]=b.getAttribute('data-v');upd();return}
   var p=e.target.closest&&e.target.closest('[data-pct]');if(p){S.pct=+p.getAttribute('data-pct');upd()}
 });
-render();
+render();renderSaved();
 if('serviceWorker' in navigator&&location.protocol.indexOf('http')===0)navigator.serviceWorker.register('sw.js').catch(function(){});
 })();
 </script>
