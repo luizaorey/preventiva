@@ -1,0 +1,15 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512">
+<defs><radialGradient id="bg" cx="50%" cy="30%" r="80%"><stop offset="0" stop-color="#14344f"/><stop offset="1" stop-color="#07111b"/></radialGradient>
+<linearGradient id="rim" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#62d5ff"/><stop offset="1" stop-color="#1f6fb2"/></linearGradient></defs>
+<rect width="512" height="512" fill="url(#bg)"/>
+<circle cx="256" cy="256" r="168" fill="#0a1b2a" stroke="url(#rim)" stroke-width="16"/>
+<g fill="none" stroke-linecap="round" stroke-width="18">
+   <path d="M 135 300 A 124 124 0 0 1 150 190" stroke="#27a8ff"/>
+ <path d="M 168 164 A 124 124 0 0 1 344 164" stroke="#72d348"/>
+ <path d="M 362 190 A 124 124 0 0 1 377 300" stroke="#ffbd36"/>
+</g>
+<g transform="rotate(32 256 256)"><polygon points="248,256 256,128 264,256" fill="#ffbd36"/></g>
+<circle cx="256" cy="256" r="20" fill="#eaf4fa"/><circle cx="256" cy="256" r="8" fill="#0a1b2a"/>
+<circle cx="372" cy="372" r="58" fill="#72d348" stroke="#07111b" stroke-width="10"/>
+<path d="M344 372 L365 393 L402 352" fill="none" stroke="#07111b" stroke-width="16" stroke-linecap="round" stroke-linejoin="round"/>
+</svg>
