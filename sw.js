@@ -1,4 +1,4 @@
-var CACHE = "preventiva-v5";
+var CACHE = "preventiva-v6";
 var ARQ = ["./", "./index.html", "./calc.js", "./manifest.webmanifest",
            "./icon-180.png", "./icon-192.png", "./icon-512.png"];
 

@@ -36,3 +36,9 @@ test('porcentagem no painel', () => {
   near(PV.ponto(base, 25).painelPct, 50); near(PV.ponto(base, 50).painelPct, 70.71);
   near(PV.ponto(Object.assign({}, base, { trat: 'linear' }), 25).painelPct, 25);
 });
+test('ponto em que o painel indica 25%', () => {
+  const f = PV.pctParaPainel(base, 0.25); near(f, 6.25); near(PV.ponto(base, f).painelPct, 25);
+  near(PV.ponto(base, f).painel, 50);
+  near(PV.pctParaPainel(Object.assign({}, base, { saida: 'vazao', trat: 'linear' }), 0.25), 6.25);
+  near(PV.pctParaPainel(Object.assign({}, base, { trat: 'linear' }), 0.25), 25);
+});

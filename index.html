@@ -111,7 +111,10 @@ $$('select.unit').forEach(function(s){s.innerHTML=units.map(function(u){return'<
 var PUN=['m³/h','m³/min','m³/s','L/h','L/min','L/s','Nm³/h','Nm³/min','kg/h','kg/min','kg/s','t/h','%'];
 function fillPun(){var el=$('#pUn'),l=PUN.slice();if(S.pUn&&l.indexOf(S.pUn)<0)l.unshift(S.pUn);
   var h=l.map(function(u){return'<option>'+esc(u)+'</option>'}).join('');if(el.getAttribute('data-h')!==h){el.innerHTML=h;el.setAttribute('data-h',h);}}
-$('#pcts').innerHTML=PV.PCTS.map(function(p){return'<button data-pct="'+p+'">'+p+'%</button>'}).join('');
+function pts(m){var a=PV.PCTS.map(function(p){return{k:String(p),pct:p}});
+  if(m)a.splice(1,0,{k:'p25',pct:PV.pctParaPainel(m,0.25),pn:true});return a}
+function pctOf(m){var q=pts(m).filter(function(x){return x.k===String(S.pct)})[0];return q?q.pct:0}
+function drawPcts(ok,m){$('#pcts').innerHTML=pts(ok?m:null).map(function(x){return'<button data-pct="'+x.k+'" class="'+(String(S.pct)===x.k?'on':'')+'">'+(x.pn?fmt(x.pct,2)+'%<br><span style="font-size:10px;font-weight:400">painel 25%</span>':x.pct+'%')+'</button>'}).join('');}
 function model(){var n=function(k){return PV.parseNum(S[k])};
   return{lo:n('lo'),hi:n('hi'),unit:S.unit,gen:S.gen,saida:S.saida,pLo:n('pLo'),pHi:n('pHi'),trat:S.trat}}
 function render(){
@@ -119,20 +122,20 @@ function render(){
   $$('[data-k]').forEach(function(el){var k=el.getAttribute('data-k');
     if(el.tagName==='BUTTON')el.classList.toggle('on',S[k]===el.getAttribute('data-v'));
     else if(document.activeElement!==el)el.value=S[k]==null?'':S[k];});
-  $$('[data-pct]').forEach(function(b){b.classList.toggle('on',+b.getAttribute('data-pct')===S.pct)});
   $('#hSaida').textContent=S.saida==='dp'?'O sinal 4–20 mA é proporcional à pressão diferencial; a raiz é extraída no painel.':'O transmissor já extrai a raiz: o sinal 4–20 mA é proporcional à vazão (painel em Linear).';
   var m=model(),d=$('#disp'),tb=$('#tab'),w=$('#warn');
   var ok=[m.lo,m.hi,m.pLo,m.pHi].every(function(x){return x!=null})&&m.lo!==m.hi&&m.pLo!==m.pHi;
   w.innerHTML=ok?PV.avisos(m).map(function(x){return'<div class="warn">⚠ '+esc(x)+'</div>'}).join(''):'';
+  drawPcts(ok,m);
   if(!ok){d.innerHTML='<p class="hint">Preencha as faixas do instrumento e do painel.</p>';tb.innerHTML='';return;}
-  var r=PV.ponto(m,S.pct),pu=esc(S.pUn||'');
+  var r=PV.ponto(m,pctOf(m)),pu=esc(S.pUn||'');
   var box=function(c,l,v,u,s){return'<div class="dbox '+c+'"><div class="dl">'+l+'</div><div class="dv mono">'+v+' <span class="u">'+esc(u)+'</span></div><small>'+s+'</small></div>'};
-  d.innerHTML=box('ap','Aplicar no gerador',fmt(r.aplicar),m.gen,S.pct+'% da faixa de pressão')+
+  d.innerHTML=box('ap','Aplicar no gerador',fmt(r.aplicar),m.gen,(S.pct==='p25'?fmt(r.pct,2):S.pct)+'% da faixa de pressão')+
     box('','Leitura no Trex',fmt(r.trex),m.unit,fmt(r.mA,2)+' mA')+
     box('','Indicação no painel',fmt(r.painel),S.pUn||'',(S.trat==='raiz'?'Raiz quadrada':'Linear')+' · '+fmt(r.painelPct)+' % da faixa do painel');
   var h='<table><thead><tr><th>Ponto</th><th>Aplicar ('+esc(m.gen)+')</th><th>Trex ('+esc(m.unit)+')</th><th>mA</th><th>Painel ('+pu+')</th><th>Painel %</th></tr></thead><tbody>';
-  PV.PCTS.forEach(function(p){var q=PV.ponto(m,p);
-    h+='<tr'+(p===S.pct?' class="sel"':'')+'><td class="mono">'+p+'%</td><td class="mono">'+fmt(q.aplicar)+'</td><td class="mono">'+fmt(q.trex)+'</td><td class="mono">'+fmt(q.mA,2)+'</td><td class="mono">'+fmt(q.painel)+'</td><td class="mono">'+fmt(q.painelPct)+' %</td></tr>';});
+  pts(m).forEach(function(x){var q=PV.ponto(m,x.pct);
+    h+='<tr'+(String(S.pct)===x.k?' class="sel"':'')+'><td class="mono">'+(x.pn?fmt(x.pct,2)+'% <small>(painel 25%)</small>':x.pct+'%')+'</td><td class="mono">'+fmt(q.aplicar)+'</td><td class="mono">'+fmt(q.trex)+'</td><td class="mono">'+fmt(q.mA,2)+'</td><td class="mono">'+fmt(q.painel)+'</td><td class="mono">'+fmt(q.painelPct)+' %</td></tr>';});
   tb.innerHTML=h+'</tbody></table>';
 }
 var SK='preventiva.saved.v1';
@@ -155,7 +158,7 @@ document.addEventListener('click',function(e){
   var bo=e.target.closest&&e.target.closest('[data-open]');if(bo){var it=getSaved()[+bo.getAttribute('data-open')];if(it){S=Object.assign({tag:''},it.S);upd();window.scrollTo({top:0,behavior:'smooth'})}return}
   var bd=e.target.closest&&e.target.closest('[data-del]');if(bd){if(confirm('Excluir este item salvo?')){var b2=getSaved();b2.splice(+bd.getAttribute('data-del'),1);setSaved(b2);renderSaved()}return}
   var b=e.target.closest&&e.target.closest('button[data-k]');if(b){S[b.getAttribute('data-k')]=b.getAttribute('data-v');upd();return}
-  var p=e.target.closest&&e.target.closest('[data-pct]');if(p){S.pct=+p.getAttribute('data-pct');upd()}
+  var p=e.target.closest&&e.target.closest('[data-pct]');if(p){var v=p.getAttribute('data-pct');S.pct=v==='p25'?'p25':+v;upd()}
 });
 render();renderSaved();
 if('serviceWorker' in navigator&&location.protocol.indexOf('http')===0)navigator.serviceWorker.register('sw.js').catch(function(){});

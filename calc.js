@@ -43,11 +43,17 @@
     const painel = p.pLo + sp * (p.pHi - p.pLo);
     return { pct, press, aplicar, mA, trex: press, painel, painelPct: sp * 100 };
   }
+  /* % da faixa de pressão em que o painel indica `frac` (0..1) da sua faixa */
+  function pctParaPainel(p, frac) {
+    const s = p.trat === 'raiz' ? frac * frac : frac;
+    const f = p.saida === 'vazao' ? s * s : s;
+    return f * 100;
+  }
   function avisos(p) {
     const w = [];
     if (p.saida === 'vazao' && p.trat === 'raiz') w.push('Raiz dupla: o transmissor já extrai a raiz e o painel também. O painel deveria estar em Linear.');
     if (p.saida === 'dp' && p.trat === 'linear') w.push('Saída linear em ΔP com painel em Linear: o painel mostra a pressão diferencial como se fosse vazão. Para indicar vazão, use Raiz quadrada.');
     return w;
   }
-  return { UNITS, conv, parseNum, fmt, ponto, avisos, PCTS: [0, 25, 50, 75, 100] };
+  return { UNITS, conv, parseNum, fmt, ponto, pctParaPainel, avisos, PCTS: [0, 25, 50, 75, 100] };
 });
