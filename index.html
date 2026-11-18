@@ -72,7 +72,7 @@ tr.sel td{background:rgba(39,168,255,.12)}
   <div class="row">
     <div class="fld"><label>Faixa — início</label><input type="text" inputmode="decimal" data-k="pLo" placeholder="0"></div>
     <div class="fld"><label>Faixa — fim</label><input type="text" inputmode="decimal" data-k="pHi" placeholder="200"></div>
-    <div class="fld"><label>Unidade</label><input type="text" data-k="pUn" placeholder="m³/h" autocapitalize="off"></div>
+    <div class="fld"><label>Unidade</label><select data-k="pUn" id="pUn"></select></div>
   </div>
   <label>Tratamento do sinal</label>
   <div class="seg">
@@ -108,10 +108,14 @@ var $=function(s){return document.querySelector(s)},$$=function(s){return [].sli
 var fmt=PV.fmt,units=Object.keys(PV.UNITS);
 function esc(s){return String(s).replace(/[&<>]/g,function(c){return{'&':'&amp;','<':'&lt;','>':'&gt;'}[c]})}
 $$('select.unit').forEach(function(s){s.innerHTML=units.map(function(u){return'<option>'+u+'</option>'}).join('')});
+var PUN=['m³/h','m³/min','m³/s','L/h','L/min','L/s','Nm³/h','Nm³/min','kg/h','kg/min','kg/s','t/h','%'];
+function fillPun(){var el=$('#pUn'),l=PUN.slice();if(S.pUn&&l.indexOf(S.pUn)<0)l.unshift(S.pUn);
+  var h=l.map(function(u){return'<option>'+esc(u)+'</option>'}).join('');if(el.getAttribute('data-h')!==h){el.innerHTML=h;el.setAttribute('data-h',h);}}
 $('#pcts').innerHTML=PV.PCTS.map(function(p){return'<button data-pct="'+p+'">'+p+'%</button>'}).join('');
 function model(){var n=function(k){return PV.parseNum(S[k])};
   return{lo:n('lo'),hi:n('hi'),unit:S.unit,gen:S.gen,saida:S.saida,pLo:n('pLo'),pHi:n('pHi'),trat:S.trat}}
 function render(){
+  fillPun();
   $$('[data-k]').forEach(function(el){var k=el.getAttribute('data-k');
     if(el.tagName==='BUTTON')el.classList.toggle('on',S[k]===el.getAttribute('data-v'));
     else if(document.activeElement!==el)el.value=S[k]==null?'':S[k];});
