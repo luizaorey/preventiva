@@ -32,3 +32,7 @@ test('avisos de raiz dupla e linear/linear', () => {
   assert.equal(PV.avisos(Object.assign({}, base, { trat: 'linear' })).length, 1);
   assert.equal(PV.avisos(base).length, 0);
 });
+test('porcentagem no painel', () => {
+  near(PV.ponto(base, 25).painelPct, 50); near(PV.ponto(base, 50).painelPct, 70.71);
+  near(PV.ponto(Object.assign({}, base, { trat: 'linear' }), 25).painelPct, 25);
+});

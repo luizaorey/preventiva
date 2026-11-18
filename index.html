@@ -129,10 +129,10 @@ function render(){
   var box=function(c,l,v,u,s){return'<div class="dbox '+c+'"><div class="dl">'+l+'</div><div class="dv mono">'+v+' <span class="u">'+esc(u)+'</span></div><small>'+s+'</small></div>'};
   d.innerHTML=box('ap','Aplicar no gerador',fmt(r.aplicar),m.gen,S.pct+'% da faixa de pressão')+
     box('','Leitura no Trex',fmt(r.trex),m.unit,fmt(r.mA,2)+' mA')+
-    box('','Indicação no painel',fmt(r.painel),S.pUn||'',S.trat==='raiz'?'Raiz quadrada':'Linear');
-  var h='<table><thead><tr><th>Ponto</th><th>Aplicar ('+esc(m.gen)+')</th><th>Trex ('+esc(m.unit)+')</th><th>mA</th><th>Painel ('+pu+')</th></tr></thead><tbody>';
+    box('','Indicação no painel',fmt(r.painel),S.pUn||'',(S.trat==='raiz'?'Raiz quadrada':'Linear')+' · '+fmt(r.painelPct)+' % da faixa do painel');
+  var h='<table><thead><tr><th>Ponto</th><th>Aplicar ('+esc(m.gen)+')</th><th>Trex ('+esc(m.unit)+')</th><th>mA</th><th>Painel ('+pu+')</th><th>Painel %</th></tr></thead><tbody>';
   PV.PCTS.forEach(function(p){var q=PV.ponto(m,p);
-    h+='<tr'+(p===S.pct?' class="sel"':'')+'><td class="mono">'+p+'%</td><td class="mono">'+fmt(q.aplicar)+'</td><td class="mono">'+fmt(q.trex)+'</td><td class="mono">'+fmt(q.mA,2)+'</td><td class="mono">'+fmt(q.painel)+'</td></tr>';});
+    h+='<tr'+(p===S.pct?' class="sel"':'')+'><td class="mono">'+p+'%</td><td class="mono">'+fmt(q.aplicar)+'</td><td class="mono">'+fmt(q.trex)+'</td><td class="mono">'+fmt(q.mA,2)+'</td><td class="mono">'+fmt(q.painel)+'</td><td class="mono">'+fmt(q.painelPct)+' %</td></tr>';});
   tb.innerHTML=h+'</tbody></table>';
 }
 var SK='preventiva.saved.v1';

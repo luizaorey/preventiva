@@ -41,7 +41,7 @@
     const mA = 4 + 16 * s;
     const sp = p.trat === 'raiz' ? Math.sqrt(s) : s;     // fração do painel
     const painel = p.pLo + sp * (p.pHi - p.pLo);
-    return { pct, press, aplicar, mA, trex: press, painel };
+    return { pct, press, aplicar, mA, trex: press, painel, painelPct: sp * 100 };
   }
   function avisos(p) {
     const w = [];
